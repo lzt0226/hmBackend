@@ -104,6 +104,9 @@ public class PatientServiceImpl implements PatientService {
         UpdateWrapper<Patient> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", id).set("severity", severity);
         patientMapper.update(null, updateWrapper);
+
+        // 等级改变后广播所有异常病人
+        broadcastAbnormalPatients();
     }
 
     @Override
