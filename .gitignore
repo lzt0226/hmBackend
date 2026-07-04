@@ -1,0 +1,3 @@
+patient-monitor-csharp/PatientMonitor.Api/obj/*
+patient-monitor-csharp/PatientMonitor.Api/bin/*
+patient-monitor-csharp/PatientMonitor.Api/*.db
