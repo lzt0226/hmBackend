@@ -13,4 +13,5 @@ public interface PatientService {
     void updatePatientSeverity(Long id, Integer severity);
     Patient handleSensorSignal(Long patientId, String behaviorType, String description, boolean isAbnormal, Integer severity);
     List<Map<String, Object>> getAbnormalPatientsWithLogs();
+    List<Map<String, Object>> getAllBehaviorLogsByPatientId(Long id);
 }

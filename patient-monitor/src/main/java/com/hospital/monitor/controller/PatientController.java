@@ -50,4 +50,10 @@ public class PatientController {
         patientService.updatePatientSeverity(id, request.getSeverity());
         return "异常等级更新成功";
     }
+
+    @GetMapping("/{id}/behavior-logs")
+    @Operation(summary = "获取患者所有行为记录（用于图表统计）")
+    public Object getPatientAllBehaviorLogs(@PathVariable Long id) {
+        return patientService.getAllBehaviorLogsByPatientId(id);
+    }
 }

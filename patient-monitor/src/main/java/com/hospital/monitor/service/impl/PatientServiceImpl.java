@@ -44,6 +44,19 @@ public class PatientServiceImpl implements PatientService {
     }
 
     /**
+     * 广播单个病人状态变化给所有前端用户
+     */
+    private void broadcastPatientUpdate(Map<String, Object> patientData) {
+        try {
+            String message = objectMapper.writeValueAsString(patientData);
+            webSocketHandler.broadcast(message);
+            log.info("已广播病人状态变化: {}", patientData);
+        } catch (Exception e) {
+            log.error("广播病人状态变化失败", e);
+        }
+    }
+
+    /**
      * 广播所有异常病人给所有前端用户
      */
     private void broadcastAbnormalPatients() {
@@ -144,9 +157,12 @@ public class PatientServiceImpl implements PatientService {
             }
         }
 
-        // 状态改变后广播所有异常病人
+        // 状态改变后广播该病人的最新状态（单条记录）
         if (statusChanged) {
-            broadcastAbnormalPatients();
+            Map<String, Object> patientData = new HashMap<>();
+            patientData.put("patient", patient);
+            patientData.put("logs", behaviorLogMapper.selectTop10ByPatientId(patientId));
+            broadcastPatientUpdate(patientData);
         }
 
         return patient;
@@ -172,6 +188,26 @@ public class PatientServiceImpl implements PatientService {
             Map<String, Object> map = new HashMap<>();
             map.put("patient", patient);
             map.put("logs", behaviorLogMapper.selectTop10ByPatientId(patient.getId()));
+            result.add(map);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllBehaviorLogsByPatientId(Long id) {
+        QueryWrapper<BehaviorLog> wrapper = new QueryWrapper<>();
+        wrapper.eq("patient_id", id).orderByDesc("record_time");
+        List<BehaviorLog> logs = behaviorLogMapper.selectList(wrapper);
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (BehaviorLog log : logs) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", log.getId());
+            map.put("patientId", log.getPatientId());
+            map.put("behaviorType", log.getBehaviorType());
+            map.put("description", log.getDescription());
+            map.put("isAbnormal", log.getIsAbnormal());
+            map.put("recordTime", log.getRecordTime());
             result.add(map);
         }
         return result;
